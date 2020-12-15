@@ -7,10 +7,38 @@ import HomePage from './pages/homepage/homepage.component';
 import ShopPage from './pages/shop/shop.component';
 import SignInAndSignUpPage from './pages/sign-in-and-sign-up/sign-in-and-sign-up.component';
 import Header from './components/header/header.component';
+import { auth } from './firebase/firebase.utils';
+// we want to save auth into our state
+
 
 class App extends Component {
+  constructor() {
+    super();
+    this.state = {
+      currentUser: null,
+    }
+  }
+
+  unsubscribeFromAuth = null;
+
+  componentDidMount() {
+    // this subscription is open at all times, until we close it!
+    // Otherwise it causes memory leaking!
+    this.unsubscribeFromAuth = auth.onAuthStateChanged(user => {
+      this.setState({ currentUser: user });
+
+      console.log('USER: ', user);
+    })
+  }
+
+  componentWillUnmount() {
+    this.unsubscribeFromAuth();
+  }
+
+
   render() {
     return <div className='App'>
+      <Header currentUser={this.state.currentUser} />
       <Switch>
         <Route exact path='/' component={HomePage} />
         <Route path='/shop' component={ShopPage} />
